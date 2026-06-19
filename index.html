@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+  ============================================================
+  PERFORMANCE NOTES — Sub-1.5s Load on HostGator cPanel
+  ============================================================
+  1. Single-file: Zero 404 risk. Upload only this index.html to
+     public_html/ root. No asset folders needed.
+  2. Tailwind CDN (Play CDN) is used for utility classes. For
+     max performance in production, swap for a PurgeCSS-built
+     Tailwind CSS file — saves ~95% of CSS bytes.
+  3. Google Fonts uses `display=swap` to prevent render-blocking.
+  4. No images — all visuals are SVG/CSS. Zero image HTTP requests.
+  5. All JS is vanilla, deferred via DOMContentLoaded. No frameworks.
+  6. CSS animations use `transform` and `opacity` only — GPU-composited,
+     zero layout thrashing. 60fps on low-end devices.
+  7. backdrop-filter (glassmorphism) is progressive enhancement —
+     degrades gracefully on older browsers with semi-transparent bg.
+  ============================================================
+  HOSTGATOR CPANEL DEPLOYMENT
+  ============================================================
+  - Upload this single file as `index.html` to /public_html/
+  - No .htaccess changes needed — HTML5 served natively.
+  - SSL/HTTPS: All external resources (Fonts, Tailwind CDN) load
+    over HTTPS. Zero mixed-content warnings.
+  - Compatible: Chrome 90+, Safari 14+, Firefox 88+, Edge 90+
+  ============================================================
+  -->
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="NEXUS PROTOCOL — The Next Generation of Decentralized Quantum Computing. Join the waitlist." />
+  <meta name="theme-color" content="#000008" />
+
+  <title>NEXUS PROTOCOL — Quantum Frontier</title>
+
+  <!-- Google Fonts: Orbitron (display) + Space Grotesk (body) -->
+  <!-- display=swap prevents render-blocking font flash -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS Play CDN — replace with compiled build for production -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    /* Tailwind config — extend with brand tokens */
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Orbitron', 'sans-serif'],
+            body: ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            void: '#000008',
+            space: '#0A0A1A',
+            deep: '#0D0D2B',
+            violet: '#6C00FF',
+            cyan: '#00E5FF',
+            plasma: '#FF2D78',
+            glow: '#A855F7',
+            card: 'rgba(255,255,255,0.04)',
+          },
+          animation: {
+            'float-slow': 'floatSlow 8s ease-in-out infinite',
+            'float-med': 'floatMed 6s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+            'spin-slow': 'spin 20s linear infinite',
+            'star-twinkle': 'twinkle 4s ease-in-out infinite',
+            'scan-line': 'scanLine 6s linear infinite',
+            'ripple': 'ripple 0.6s linear forwards',
+          },
+          keyframes: {
+            floatSlow: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-24px) rotate(1deg)' },
+            },
+            floatMed: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-14px)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.7', transform: 'scale(1)' },
+              '50%': { opacity: '1', transform: 'scale(1.03)' },
+            },
+            twinkle: {
+              '0%, 100%': { opacity: '0.2' },
+              '50%': { opacity: '1' },
+            },
+            scanLine: {
+              '0%': { transform: 'translateY(-100%)' },
+              '100%': { transform: 'translateY(100vh)' },
+            },
+            ripple: {
+              '0%': { transform: 'scale(0)', opacity: '0.5' },
+              '100%': { transform: 'scale(4)', opacity: '0' },
+            },
+          },
+          backdropBlur: {
+            xs: '4px',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* ============================================================
+       BASE & GLOBAL STYLES
+       All animations use transform/opacity — GPU composited only.
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cyan: #00E5FF;
+      --violet: #6C00FF;
+      --plasma: #FF2D78;
+      --glow: #A855F7;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: #000008;
+      font-family: 'Space Grotesk', sans-serif;
+      color: #E2E8F0;
+      overflow-x: hidden;
+      /* Subtle radial void gradient on body */
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(108,0,255,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,229,255,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 40% at 10% 90%, rgba(255,45,120,0.06) 0%, transparent 50%);
+    }
+
+    /* Reduce motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ============================================================
+       STARFIELD — Pure CSS, zero JS, zero canvas
+       Layered radial-gradient dots create depth via parallax feel
+    ============================================================ */
+    .starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .starfield-layer {
+      position: absolute;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+    }
+
+    /* Stars: tiny radial dots scattered via background-image */
+    .stars-sm {
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.9) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 8%, rgba(200,220,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 22%, rgba(255,255,255,0.8) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 5%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 18%, rgba(200,220,255,0.9) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 12%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 3% 35%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 18% 42%, rgba(255,255,255,0.8) 0%, transparent 100%),
+        radial-gradient(1px 1px at 32% 48%, rgba(200,220,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 48% 38%, rgba(255,255,255,0.9) 0%, transparent 100%),
+        radial-gradient(1px 1px at 63% 55%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 77% 44%, rgba(200,220,255,0.8) 0%, transparent 100%),
+        radial-gradient(1px 1px at 91% 30%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 7% 62%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 22% 68%, rgba(200,220,255,0.9) 0%, transparent 100%),
+        radial-gradient(1px 1px at 37% 75%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 52% 82%, rgba(255,255,255,0.8) 0%, transparent 100%),
+        radial-gradient(1px 1px at 67% 70%, rgba(200,220,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 82% 85%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 94% 65%, rgba(255,255,255,0.9) 0%, transparent 100%),
+        radial-gradient(1px 1px at 14% 88%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 46% 92%, rgba(200,220,255,0.8) 0%, transparent 100%),
+        radial-gradient(1px 1px at 59% 78%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 73% 95%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 89% 88%, rgba(200,220,255,0.9) 0%, transparent 100%);
+      background-size: 100% 100%;
+      animation: twinkleFade 8s ease-in-out infinite alternate;
+    }
+
+    .stars-md {
+      background-image:
+        radial-gradient(1.5px 1.5px at 15% 25%, rgba(0,229,255,0.6) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 45% 10%, rgba(255,255,255,0.9) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 75% 35%, rgba(168,85,247,0.7) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 20% 60%, rgba(255,255,255,0.8) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 60% 65%, rgba(0,229,255,0.5) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 88% 50%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 35% 85%, rgba(168,85,247,0.6) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 55% 90%, rgba(255,255,255,0.9) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 8% 78%, rgba(0,229,255,0.4) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 95% 20%, rgba(255,255,255,0.6) 0%, transparent 100%);
+      background-size: 100% 100%;
+      animation: twinkleFade 6s ease-in-out infinite alternate-reverse;
+    }
+
+    .stars-lg {
+      background-image:
+        radial-gradient(2px 2px at 30% 20%, rgba(255,255,255,1) 0%, transparent 100%),
+        radial-gradient(2.5px 2.5px at 70% 15%, rgba(0,229,255,0.9) 0%, transparent 100%),
+        radial-gradient(2px 2px at 50% 70%, rgba(255,255,255,0.9) 0%, transparent 100%),
+        radial-gradient(2px 2px at 10% 50%, rgba(168,85,247,0.8) 0%, transparent 100%),
+        radial-gradient(2.5px 2.5px at 90% 75%, rgba(255,255,255,1) 0%, transparent 100%);
+      background-size: 100% 100%;
+      animation: twinkleFade 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes twinkleFade {
+      0% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    /* ============================================================
+       GLASSMORPHISM UTILITY
+       backdrop-filter degrades gracefully: older browsers get
+       semi-transparent background instead.
+    ============================================================ */
+    .glass {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: rgba(10, 10, 40, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(108, 0, 255, 0.25);
+    }
+
+    .glass-modal {
+      background: rgba(5, 5, 25, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+    }
+
+    /* ============================================================
+       NEON TEXT GLOWS
+    ============================================================ */
+    .glow-cyan {
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.8), 0 0 40px rgba(0, 229, 255, 0.4);
+    }
+    .glow-violet {
+      text-shadow: 0 0 20px rgba(108, 0, 255, 0.8), 0 0 40px rgba(108, 0, 255, 0.4);
+    }
+    .glow-plasma {
+      text-shadow: 0 0 20px rgba(255, 45, 120, 0.8), 0 0 40px rgba(255, 45, 120, 0.4);
+    }
+
+    /* ============================================================
+       BOX GLOWS
+    ============================================================ */
+    .box-glow-violet {
+      box-shadow: 0 0 0 1px rgba(108,0,255,0.4), 0 0 30px rgba(108,0,255,0.2), 0 0 60px rgba(108,0,255,0.1);
+    }
+    .box-glow-cyan {
+      box-shadow: 0 0 0 1px rgba(0,229,255,0.4), 0 0 30px rgba(0,229,255,0.2), 0 0 60px rgba(0,229,255,0.1);
+    }
+
+    /* ============================================================
+       GRADIENT TEXT
+    ============================================================ */
+    .gradient-text {
+      background: linear-gradient(135deg, #00E5FF 0%, #A855F7 50%, #FF2D78 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .gradient-text-alt {
+      background: linear-gradient(135deg, #A855F7 0%, #00E5FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ============================================================
+       CTA BUTTON — Ripple effect on click via JS-injected spans
+    ============================================================ */
+    .btn-cta {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #6C00FF 0%, #00E5FF 100%);
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 0 30px rgba(108,0,255,0.5), 0 0 60px rgba(0,229,255,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 50px rgba(108,0,255,0.7), 0 0 90px rgba(0,229,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    .btn-cta:active { transform: translateY(0) scale(0.99); }
+
+    /* Ripple child element — injected by JS on click */
+    .btn-cta .ripple-wave {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.35);
+      transform: scale(0);
+      animation: rippleAnim 0.65s linear forwards;
+      pointer-events: none;
+    }
+
+    @keyframes rippleAnim {
+      0%   { transform: scale(0); opacity: 0.5; }
+      100% { transform: scale(5); opacity: 0; }
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(0,229,255,0.4);
+      color: #00E5FF;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(0,229,255,0.08);
+      border-color: rgba(0,229,255,0.8);
+      box-shadow: 0 0 20px rgba(0,229,255,0.2);
+    }
+
+    /* ============================================================
+       INPUT STYLES — Futuristic focus glow
+    ============================================================ */
+    .input-quantum {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #E2E8F0;
+      font-family: 'Space Grotesk', sans-serif;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    }
+
+    .input-quantum::placeholder { color: rgba(200, 210, 230, 0.35); }
+
+    .input-quantum:focus {
+      border-color: rgba(0, 229, 255, 0.7);
+      background: rgba(0, 229, 255, 0.04);
+      box-shadow: 0 0 0 3px rgba(0,229,255,0.12), 0 0 20px rgba(0,229,255,0.15);
+    }
+
+    /* ============================================================
+       SCAN LINE OVERLAY — Subtle CRT atmosphere
+    ============================================================ */
+    .scan-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+    }
+
+    /* ============================================================
+       FLOATING AMBIENT ORB SHAPES
+    ============================================================ */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       LOGO SVG ANIMATION
+    ============================================================ */
+    .logo-ring {
+      animation: spinSlow 25s linear infinite;
+      transform-origin: center;
+    }
+    .logo-inner-ring {
+      animation: spinSlow 15s linear infinite reverse;
+      transform-origin: center;
+    }
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* ============================================================
+       GRID CONSTELLATION LINES — SVG background decoration
+    ============================================================ */
+    .constellation {
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       SECTION DIVIDER
+    ============================================================ */
+    .divider-glow {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,229,255,0.5), rgba(108,0,255,0.5), transparent);
+    }
+
+    /* ============================================================
+       FEATURE CARD HOVER
+    ============================================================ */
+    .feature-card {
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0,229,255,0.4);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px rgba(0,229,255,0.08);
+    }
+
+    /* ============================================================
+       MODAL OVERLAY
+    ============================================================ */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 10, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    #modal-overlay.active {
+      display: flex;
+      animation: fadeIn 0.25s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .modal-box {
+      animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      max-width: 480px;
+      width: 100%;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ============================================================
+       STATS COUNTER
+    ============================================================ */
+    .stat-number {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #00E5FF, #A855F7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ============================================================
+       NAVBAR
+    ============================================================ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 500;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+    nav.scrolled {
+      background: rgba(5, 5, 20, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(108,0,255,0.2);
+    }
+
+    /* ============================================================
+       TERMINAL BLINK CURSOR
+    ============================================================ */
+    .cursor-blink::after {
+      content: '_';
+      animation: blink 1.1s step-end infinite;
+      color: #00E5FF;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* ============================================================
+       SUCCESS STATE
+    ============================================================ */
+    #form-success {
+      display: none;
+    }
+    #form-success.visible {
+      display: flex;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #000008; }
+    ::-webkit-scrollbar-thumb { background: rgba(108,0,255,0.5); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0,229,255,0.5); }
+  </style>
+</head>
+
+<body class="relative min-h-screen">
+
+  <!-- ============================================================
+       STARFIELD BACKGROUND (CSS-only, fixed position)
+  ============================================================ -->
+  <div class="starfield" aria-hidden="true">
+    <div class="starfield-layer stars-sm"></div>
+    <div class="starfield-layer stars-md"></div>
+    <div class="starfield-layer stars-lg"></div>
+  </div>
+
+  <!-- Subtle CRT scan-line texture overlay -->
+  <div class="scan-overlay" aria-hidden="true"></div>
+
+  <!-- Ambient floating color orbs — positioned absolutely within body -->
+  <div class="orb w-96 h-96 bg-violet-900 opacity-20" style="top: 5%; left: -10%; animation: floatOrb1 18s ease-in-out infinite;" aria-hidden="true"></div>
+  <div class="orb w-80 h-80 bg-cyan-500 opacity-10" style="top: 30%; right: -8%; animation: floatOrb2 14s ease-in-out infinite;" aria-hidden="true"></div>
+  <div class="orb w-72 h-72" style="background: #FF2D78; opacity: 0.06; bottom: 10%; left: 20%; animation: floatOrb1 20s ease-in-out infinite reverse; border-radius:50%; filter:blur(80px);" aria-hidden="true"></div>
+
+  <style>
+    @keyframes floatOrb1 {
+      0%, 100% { transform: translate(0, 0); }
+      33%       { transform: translate(30px, -40px); }
+      66%       { transform: translate(-20px, 20px); }
+    }
+    @keyframes floatOrb2 {
+      0%, 100% { transform: translate(0, 0); }
+      50%       { transform: translate(-40px, 30px); }
+    }
+  </style>
+
+  <!-- ============================================================
+       NAVIGATION
+  ============================================================ -->
+  <nav id="navbar" aria-label="Main navigation">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <!-- Nav Logo mark -->
+      <div class="flex items-center gap-3">
+        <svg width="28" height="28" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <circle cx="20" cy="20" r="18" stroke="url(#navGrad)" stroke-width="1.5"/>
+          <polygon points="20,8 26,18 20,22 14,18" fill="url(#navGrad)" opacity="0.9"/>
+          <polygon points="20,32 26,22 20,18 14,22" fill="url(#navGrad)" opacity="0.5"/>
+          <defs>
+            <linearGradient id="navGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00E5FF"/>
+              <stop offset="1" stop-color="#6C00FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="font-display font-700 text-sm tracking-widest text-white/90">NEXUS<span class="text-cyan-400">://</span></span>
+      </div>
+
+      <!-- Nav links — hidden on mobile -->
+      <div class="hidden md:flex items-center gap-8 text-sm font-body" role="list">
+        <a href="#features" class="text-white/60 hover:text-cyan-400 transition-colors duration-200 tracking-wide" role="listitem">Protocol</a>
+        <a href="#stats" class="text-white/60 hover:text-cyan-400 transition-colors duration-200 tracking-wide" role="listitem">Metrics</a>
+        <a href="#team" class="text-white/60 hover:text-cyan-400 transition-colors duration-200 tracking-wide" role="listitem">Team</a>
+        <button
+          class="btn-cta px-5 py-2 rounded text-xs"
+          onclick="openModal()"
+          aria-haspopup="dialog"
+          aria-label="Open access terminal waitlist form"
+        >Access Terminal</button>
+      </div>
+
+      <!-- Mobile CTA -->
+      <button
+        class="md:hidden btn-cta px-4 py-2 rounded text-xs"
+        onclick="openModal()"
+        aria-haspopup="dialog"
+        aria-label="Open access terminal"
+      >Access</button>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       MAIN CONTENT
+  ============================================================ -->
+  <main class="relative z-10">
+
+    <!-- ============================================================
+         HERO SECTION
+    ============================================================ -->
+    <section class="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-20" aria-labelledby="hero-headline">
+
+      <!-- SVG Logo Placeholder — Glowing Geometric Mark -->
+      <div class="mb-10 relative flex flex-col items-center" style="animation: floatMed 7s ease-in-out infinite;" aria-label="Nexus Protocol logo">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nexus Protocol geometric logo">
+          <!-- Outer rotating ring -->
+          <circle class="logo-ring" cx="60" cy="60" r="54" stroke="url(#lgGrad1)" stroke-width="1" stroke-dasharray="8 6" opacity="0.7"/>
+          <!-- Mid rotating ring -->
+          <circle class="logo-inner-ring" cx="60" cy="60" r="44" stroke="url(#lgGrad2)" stroke-width="0.75" stroke-dasharray="4 8" opacity="0.5"/>
+          <!-- Static base ring -->
+          <circle cx="60" cy="60" r="36" stroke="url(#lgGrad1)" stroke-width="1.5" opacity="0.9"/>
+          <!-- Core geometric shape: interlocked triangles (quantum symbol) -->
+          <polygon points="60,22 80,55 40,55" fill="url(#lgGrad1)" opacity="0.9"/>
+          <polygon points="60,98 80,65 40,65" fill="url(#lgGrad2)" opacity="0.7"/>
+          <!-- Center dot -->
+          <circle cx="60" cy="60" r="5" fill="#00E5FF" opacity="0.95"/>
+          <circle cx="60" cy="60" r="2.5" fill="#fff"/>
+          <!-- Glow filter -->
+          <defs>
+            <linearGradient id="lgGrad1" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00E5FF"/>
+              <stop offset="0.5" stop-color="#A855F7"/>
+              <stop offset="1" stop-color="#6C00FF"/>
+            </linearGradient>
+            <linearGradient id="lgGrad2" x1="120" y1="0" x2="0" y2="120" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FF2D78"/>
+              <stop offset="1" stop-color="#6C00FF"/>
+            </linearGradient>
+            <filter id="logoGlow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+
+        <!-- Subtle glow ring behind logo -->
+        <div class="absolute inset-0 rounded-full" style="background: radial-gradient(circle, rgba(108,0,255,0.3) 0%, transparent 70%); filter: blur(20px); z-index: -1;"></div>
+      </div>
+
+      <!-- Company name -->
+      <div class="mb-2 flex items-center gap-3 justify-center">
+        <div class="h-px w-12 bg-gradient-to-r from-transparent to-cyan-400 opacity-60"></div>
+        <p class="font-display text-xs tracking-[0.35em] text-cyan-400 uppercase">Nexus Protocol</p>
+        <div class="h-px w-12 bg-gradient-to-l from-transparent to-cyan-400 opacity-60"></div>
+      </div>
+
+      <!-- Tagline -->
+      <p class="font-body text-sm tracking-[0.2em] text-white/40 uppercase mb-8">
+        Initializing Quantum Mesh — Node v0.9.1
+      </p>
+
+      <!-- Hero Headline -->
+      <h1 id="hero-headline" class="font-display font-black text-4xl sm:text-5xl lg:text-7xl leading-none tracking-tight mb-6 max-w-5xl">
+        <span class="gradient-text">The Next Generation</span>
+        <br/>
+        <span class="text-white/95">of Decentralized</span>
+        <br/>
+        <span class="gradient-text-alt">Quantum Computing</span>
+      </h1>
+
+      <!-- Sub-headline -->
+      <p class="font-body text-base sm:text-lg text-white/55 max-w-2xl mb-12 leading-relaxed">
+        A sovereign, lattice-encrypted compute layer operating at the intersection of quantum entanglement and distributed consensus. No central authority. No single point of failure. Pure signal.
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
+        <button
+          class="btn-cta px-10 py-4 rounded-lg text-sm w-full sm:w-auto"
+          onclick="openModal()"
+          aria-haspopup="dialog"
+          aria-label="Join the waitlist"
+        >
+          <span class="relative z-10 flex items-center gap-2 justify-center">
+            <!-- Terminal icon SVG -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <polyline points="4 17 10 11 4 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="12" y1="19" x2="20" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Join Waitlist
+          </span>
+        </button>
+
+        <button class="btn-secondary px-10 py-4 rounded-lg text-xs w-full sm:w-auto">
+          Read the Whitepaper
+        </button>
+      </div>
+
+      <!-- Terminal status bar below CTA -->
+      <div class="mt-12 glass rounded-lg px-6 py-3 inline-flex items-center gap-3 text-xs font-body">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-white/40">SYS STATUS:</span>
+        <span class="text-emerald-400 font-medium tracking-wide">ONLINE</span>
+        <span class="text-white/20 mx-2">|</span>
+        <span class="text-white/40">NODES:</span>
+        <span class="text-cyan-400 font-medium">14,872</span>
+        <span class="text-white/20 mx-2">|</span>
+        <span class="text-white/40">LATENCY:</span>
+        <span class="text-violet-400 font-medium">0.4ms<span class="cursor-blink"></span></span>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         DIVIDER
+    ============================================================ -->
+    <div class="divider-glow mx-6 max-w-7xl lg:mx-auto" role="separator"></div>
+
+    <!-- ============================================================
+         STATS SECTION
+    ============================================================ -->
+    <section id="stats" class="py-20 px-6" aria-labelledby="stats-heading">
+      <h2 id="stats-heading" class="sr-only">Protocol Metrics</h2>
+      <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+
+        <!-- Stat 1 -->
+        <div class="glass-card rounded-xl p-6 text-center feature-card box-glow-violet">
+          <p class="stat-number text-3xl sm:text-4xl font-black mb-1">99.99<span class="text-xl">%</span></p>
+          <p class="text-white/50 text-xs tracking-widest uppercase">Uptime SLA</p>
+        </div>
+
+        <!-- Stat 2 -->
+        <div class="glass-card rounded-xl p-6 text-center feature-card box-glow-violet">
+          <p class="stat-number text-3xl sm:text-4xl font-black mb-1">2.1<span class="text-xl">PB</span></p>
+          <p class="text-white/50 text-xs tracking-widest uppercase">Data Processed</p>
+        </div>
+
+        <!-- Stat 3 -->
+        <div class="glass-card rounded-xl p-6 text-center feature-card box-glow-violet">
+          <p class="stat-number text-3xl sm:text-4xl font-black mb-1">256<span class="text-xl">Q</span></p>
+          <p class="text-white/50 text-xs tracking-widest uppercase">Qubit Depth</p>
+        </div>
+
+        <!-- Stat 4 -->
+        <div class="glass-card rounded-xl p-6 text-center feature-card box-glow-violet">
+          <p class="stat-number text-3xl sm:text-4xl font-black mb-1">14K<span class="text-xl">+</span></p>
+          <p class="text-white/50 text-xs tracking-widest uppercase">Active Nodes</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         DIVIDER
+    ============================================================ -->
+    <div class="divider-glow mx-6 max-w-7xl lg:mx-auto" role="separator"></div>
+
+    <!-- ============================================================
+         FEATURES SECTION
+    ============================================================ -->
+    <section id="features" class="py-24 px-6" aria-labelledby="features-heading">
+      <div class="max-w-7xl mx-auto">
+
+        <!-- Section header -->
+        <div class="text-center mb-16">
+          <p class="font-display text-xs tracking-[0.3em] text-violet-400 uppercase mb-4">Core Architecture</p>
+          <h2 id="features-heading" class="font-display font-black text-3xl sm:text-4xl text-white mb-4">
+            The <span class="gradient-text">Protocol Stack</span>
+          </h2>
+          <p class="text-white/45 max-w-xl mx-auto leading-relaxed">
+            Each layer of the Nexus Protocol is engineered for zero-trust, post-quantum cryptographic integrity across a distributed mesh.
+          </p>
+        </div>
+
+        <!-- Feature cards grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <!-- Feature 1 -->
+          <div class="glass-card rounded-2xl p-8 feature-card">
+            <!-- Icon -->
+            <div class="w-12 h-12 rounded-xl mb-6 flex items-center justify-center" style="background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#00E5FF" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M2 17l10 5 10-5" stroke="#00E5FF" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M2 12l10 5 10-5" stroke="#00E5FF" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p class="font-display text-xs tracking-widest text-cyan-400 uppercase mb-2">Layer 01</p>
+            <h3 class="font-display font-bold text-lg text-white mb-3">Lattice Encryption</h3>
+            <p class="text-white/50 text-sm leading-relaxed">Post-quantum cryptographic lattice structures that remain unbreakable against both classical and quantum attack vectors, ensuring data sovereignty at the protocol level.</p>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="glass-card rounded-2xl p-8 feature-card">
+            <div class="w-12 h-12 rounded-xl mb-6 flex items-center justify-center" style="background: rgba(108,0,255,0.1); border: 1px solid rgba(108,0,255,0.25);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="3" stroke="#A855F7" stroke-width="1.5"/>
+                <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="#A855F7" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M4.9 4.9l2.1 2.1M16.9 16.9l2.1 2.1M4.9 19.1l2.1-2.1M16.9 7.1l2.1-2.1" stroke="#A855F7" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <p class="font-display text-xs tracking-widest text-violet-400 uppercase mb-2">Layer 02</p>
+            <h3 class="font-display font-bold text-lg text-white mb-3">Entanglement Mesh</h3>
+            <p class="text-white/50 text-sm leading-relaxed">Quantum-entangled node pairs form the backbone of instantaneous state synchronization across geographically distributed infrastructure with sub-millisecond coherence.</p>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="glass-card rounded-2xl p-8 feature-card">
+            <div class="w-12 h-12 rounded-xl mb-6 flex items-center justify-center" style="background: rgba(255,45,120,0.1); border: 1px solid rgba(255,45,120,0.2);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#FF2D78" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p class="font-display text-xs tracking-widest text-pink-400 uppercase mb-2">Layer 03</p>
+            <h3 class="font-display font-bold text-lg text-white mb-3">Zero-Latency Compute</h3>
+            <p class="text-white/50 text-sm leading-relaxed">Distributed compute tasks are parallelized across quantum processing units, eliminating serial bottlenecks and delivering results at the theoretical minimum time bound.</p>
+          </div>
+
+          <!-- Feature 4 -->
+          <div class="glass-card rounded-2xl p-8 feature-card">
+            <div class="w-12 h-12 rounded-xl mb-6 flex items-center justify-center" style="background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" stroke="#00E5FF" stroke-width="1.5"/>
+                <path d="M7 11V7a5 5 0 0110 0v4" stroke="#00E5FF" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="12" cy="16" r="1.5" fill="#00E5FF"/>
+              </svg>
+            </div>
+            <p class="font-display text-xs tracking-widest text-cyan-400 uppercase mb-2">Layer 04</p>
+            <h3 class="font-display font-bold text-lg text-white mb-3">Sovereign Identity</h3>
+            <p class="text-white/50 text-sm leading-relaxed">Self-custodial cryptographic identity anchored to the protocol's consensus layer. No third-party credential intermediaries. Your keys, your authority, your data.</p>
+          </div>
+
+          <!-- Feature 5 -->
+          <div class="glass-card rounded-2xl p-8 feature-card">
+            <div class="w-12 h-12 rounded-xl mb-6 flex items-center justify-center" style="background: rgba(108,0,255,0.1); border: 1px solid rgba(108,0,255,0.25);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="#A855F7" stroke-width="1.5"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" stroke="#A855F7" stroke-width="1.5"/>
+                <line x1="12" y1="22.08" x2="12" y2="12" stroke="#A855F7" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <p class="font-display text-xs tracking-widest text-violet-400 uppercase mb-2">Layer 05</p>
+            <h3 class="font-display font-bold text-lg text-white mb-3">Distributed Consensus</h3>
+            <p class="text-white/50 text-sm leading-relaxed">A Byzantine fault-tolerant consensus mechanism tolerates up to 33% malicious actors without compromising network integrity, finality, or throughput across any topology.</p>
+          </div>
+
+          <!-- Feature 6 — CTA card -->
+          <div class="rounded-2xl p-8 feature-card flex flex-col justify-between" style="background: linear-gradient(135deg, rgba(108,0,255,0.15) 0%, rgba(0,229,255,0.08) 100%); border: 1px solid rgba(108,0,255,0.3);">
+            <div>
+              <p class="font-display text-xs tracking-widest text-violet-300 uppercase mb-2">Access</p>
+              <h3 class="font-display font-bold text-lg text-white mb-3">Become an Early Node Operator</h3>
+              <p class="text-white/50 text-sm leading-relaxed mb-6">The genesis epoch has limited operator slots. Secure your position in the first wave of sovereign compute providers.</p>
+            </div>
+            <button
+              class="btn-cta px-6 py-3 rounded-lg text-xs w-full"
+              onclick="openModal()"
+              aria-haspopup="dialog"
+              aria-label="Reserve your node slot"
+            >Reserve Your Slot →</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         DIVIDER
+    ============================================================ -->
+    <div class="divider-glow mx-6 max-w-7xl lg:mx-auto" role="separator"></div>
+
+    <!-- ============================================================
+         TEAM / TRUST SECTION
+    ============================================================ -->
+    <section id="team" class="py-24 px-6" aria-labelledby="team-heading">
+      <div class="max-w-5xl mx-auto text-center">
+
+        <p class="font-display text-xs tracking-[0.3em] text-cyan-400 uppercase mb-4">Built By</p>
+        <h2 id="team-heading" class="font-display font-black text-3xl sm:text-4xl text-white mb-6">
+          Architects of the <span class="gradient-text">Quantum Frontier</span>
+        </h2>
+        <p class="text-white/45 max-w-2xl mx-auto leading-relaxed mb-16">
+          Researchers, cryptographers, and distributed systems engineers from CERN, MIT, and the open-source cryptography community — united by one objective.
+        </p>
+
+        <!-- Team placeholder cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16">
+
+          <div class="glass-card rounded-2xl p-6 feature-card text-center">
+            <!-- Avatar placeholder -->
+            <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(108,0,255,0.3), rgba(0,229,255,0.2)); border: 1px solid rgba(0,229,255,0.2);">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" stroke="#00E5FF" stroke-width="1.5"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#00E5FF" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="font-display font-bold text-sm text-white mb-1">Dr. Ava Reyes</h3>
+            <p class="text-xs text-cyan-400 tracking-wide uppercase mb-3">Chief Protocol Architect</p>
+            <p class="text-white/40 text-xs leading-relaxed">Formerly CERN Quantum Computing Division. 14 years in post-quantum cryptographic research.</p>
+          </div>
+
+          <div class="glass-card rounded-2xl p-6 feature-card text-center">
+            <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(255,45,120,0.2), rgba(108,0,255,0.2)); border: 1px solid rgba(108,0,255,0.25);">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" stroke="#A855F7" stroke-width="1.5"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#A855F7" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="font-display font-bold text-sm text-white mb-1">Kai Nakamura</h3>
+            <p class="text-xs text-violet-400 tracking-wide uppercase mb-3">Distributed Systems Lead</p>
+            <p class="text-white/40 text-xs leading-relaxed">Former Principal Engineer at Ethereum Foundation. Authored the lattice-BFT consensus specification.</p>
+          </div>
+
+          <div class="glass-card rounded-2xl p-6 feature-card text-center">
+            <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(255,45,120,0.1)); border: 1px solid rgba(255,45,120,0.2);">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" stroke="#FF2D78" stroke-width="1.5"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#FF2D78" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="font-display font-bold text-sm text-white mb-1">Zara Osei</h3>
+            <p class="text-xs text-pink-400 tracking-wide uppercase mb-3">Head of Zero-Trust Security</p>
+            <p class="text-white/40 text-xs leading-relaxed">MIT Lincoln Laboratory alumna. Contributed to NIST Post-Quantum Cryptography standardization.</p>
+          </div>
+
+        </div>
+
+        <!-- Final CTA block -->
+        <div class="glass rounded-2xl p-10 box-glow-violet" style="border: 1px solid rgba(108,0,255,0.25);">
+          <p class="font-display font-black text-2xl sm:text-3xl text-white mb-3">
+            The epoch begins <span class="gradient-text">Q1 2026.</span>
+          </p>
+          <p class="text-white/45 mb-8 max-w-lg mx-auto">Early access slots are strictly limited. Secure your terminal access before the genesis block is sealed.</p>
+          <button
+            class="btn-cta px-12 py-4 rounded-xl text-sm"
+            onclick="openModal()"
+            aria-haspopup="dialog"
+            aria-label="Open waitlist form"
+          >
+            <span class="flex items-center gap-2 justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <polyline points="4 17 10 11 4 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="12" y1="19" x2="20" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Secure Terminal Access
+            </span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer class="relative z-10 py-10 px-6 border-t" style="border-color: rgba(255,255,255,0.06);" role="contentinfo">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <svg width="20" height="20" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <circle cx="20" cy="20" r="18" stroke="url(#ftGrad)" stroke-width="1.5"/>
+          <polygon points="20,8 26,18 20,22 14,18" fill="url(#ftGrad)" opacity="0.9"/>
+          <polygon points="20,32 26,22 20,18 14,22" fill="url(#ftGrad)" opacity="0.5"/>
+          <defs>
+            <linearGradient id="ftGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00E5FF"/>
+              <stop offset="1" stop-color="#6C00FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="font-display text-xs tracking-widest text-white/40">NEXUS PROTOCOL</span>
+      </div>
+      <p class="text-white/25 text-xs tracking-wide">© 2026 Nexus Protocol Foundation. All rights reserved.</p>
+      <div class="flex gap-6 text-xs text-white/30">
+        <a href="#" class="hover:text-cyan-400 transition-colors">Privacy</a>
+        <a href="#" class="hover:text-cyan-400 transition-colors">Terms</a>
+        <a href="#" class="hover:text-cyan-400 transition-colors">Security</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       MODAL — Glassmorphic Waitlist Form
+  ============================================================ -->
+  <div
+    id="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+    aria-describedby="modal-desc"
+  >
+    <div class="modal-box glass-modal rounded-2xl p-8 w-full relative" style="box-shadow: 0 0 0 1px rgba(0,229,255,0.15), 0 40px 80px rgba(0,0,0,0.6), 0 0 60px rgba(108,0,255,0.15);">
+
+      <!-- Close button -->
+      <button
+        onclick="closeModal()"
+        class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-white/40 hover:text-white transition-colors"
+        style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);"
+        aria-label="Close modal"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <!-- Modal header -->
+      <div class="mb-8">
+        <p class="font-display text-xs tracking-[0.3em] text-cyan-400 uppercase mb-3">// access terminal</p>
+        <h2 id="modal-title" class="font-display font-black text-2xl text-white mb-3">
+          Request Early <span class="gradient-text">Access</span>
+        </h2>
+        <p id="modal-desc" class="text-white/45 text-sm leading-relaxed">
+          Genesis-epoch slots are capped at 500 nodes globally. Drop your coordinates and we'll uplink when your access window opens.
+        </p>
+      </div>
+
+      <!-- Form — success state hidden by default -->
+      <div id="form-view">
+
+        <div class="space-y-4 mb-6">
+
+          <!-- Name input -->
+          <div>
+            <label for="input-name" class="block text-xs font-display tracking-widest text-white/40 uppercase mb-2">Operator Handle</label>
+            <input
+              id="input-name"
+              type="text"
+              placeholder="e.g. node_sentinel_7"
+              class="input-quantum w-full rounded-lg px-4 py-3 text-sm"
+              autocomplete="off"
+              spellcheck="false"
+              aria-required="true"
+            />
+          </div>
+
+          <!-- Email input -->
+          <div>
+            <label for="input-email" class="block text-xs font-display tracking-widest text-white/40 uppercase mb-2">Transmission Address</label>
+            <input
+              id="input-email"
+              type="email"
+              placeholder="you@domain.io"
+              class="input-quantum w-full rounded-lg px-4 py-3 text-sm"
+              autocomplete="email"
+              aria-required="true"
+            />
+          </div>
+
+          <!-- Role select -->
+          <div>
+            <label for="input-role" class="block text-xs font-display tracking-widest text-white/40 uppercase mb-2">Operator Class</label>
+            <select
+              id="input-role"
+              class="input-quantum w-full rounded-lg px-4 py-3 text-sm cursor-pointer appearance-none"
+              style="background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%2200E5FF%22 stroke-width=%222%22><polyline points=%226 9 12 15 18 9%22/></svg>'); background-repeat: no-repeat; background-position: right 1rem center;"
+              aria-required="true"
+            >
+              <option value="" style="background: #0D0D2B;">Select role...</option>
+              <option value="node-operator" style="background: #0D0D2B;">Node Operator</option>
+              <option value="researcher" style="background: #0D0D2B;">Quantum Researcher</option>
+              <option value="developer" style="background: #0D0D2B;">Protocol Developer</option>
+              <option value="investor" style="background: #0D0D2B;">Strategic Partner</option>
+              <option value="other" style="background: #0D0D2B;">Other</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Error message (hidden by default) -->
+        <p id="form-error" class="text-pink-400 text-xs mb-4 hidden" role="alert" aria-live="polite"></p>
+
+        <!-- Submit button -->
+        <button
+          id="submit-btn"
+          type="button"
+          onclick="handleSubmit()"
+          class="btn-cta w-full py-4 rounded-xl text-sm"
+          aria-label="Submit waitlist form"
+        >
+          <span id="submit-label" class="flex items-center justify-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+            Transmit Access Request
+          </span>
+        </button>
+
+        <p class="text-center text-white/20 text-xs mt-4">
+          No spam. Encrypted. You can revoke at any time.
+        </p>
+
+      </div>
+
+      <!-- Success state -->
+      <div id="form-success" class="flex-col items-center text-center py-6" aria-live="polite">
+        <div class="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center" style="background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3);">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12" stroke="#00E5FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display font-black text-xl text-white mb-2">Signal Received</h3>
+        <p class="text-white/50 text-sm mb-6">Your access request has been encrypted and transmitted. We'll uplink when your node slot opens.</p>
+        <p class="font-display text-xs tracking-widest text-cyan-400" id="success-handle"></p>
+        <button onclick="closeModal()" class="btn-secondary mt-6 px-8 py-3 rounded-lg text-xs">
+          Close Terminal
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       VANILLA JAVASCRIPT
+       All logic is deferred — runs after DOM ready.
+       No frameworks. No build step.
+  ============================================================ -->
+  <script>
+    /* ============================================================
+       NAVBAR — Add `scrolled` class after 60px scroll
+       Uses `scroll` event with passive:true for 60fps performance
+    ============================================================ */
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+
+    /* ============================================================
+       MODAL CONTROLS
+    ============================================================ */
+    const modalOverlay = document.getElementById('modal-overlay');
+
+    function openModal() {
+      modalOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden'; // Prevent background scroll
+      // Focus the first input for accessibility
+      setTimeout(() => {
+        const firstInput = document.getElementById('input-name');
+        if (firstInput) firstInput.focus();
+      }, 100);
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+      // Reset form to initial state after close animation
+      setTimeout(resetForm, 250);
+    }
+
+    // Close on backdrop click
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+
+    // Close on Escape key — accessibility requirement
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
+    });
+
+
+    /* ============================================================
+       RIPPLE EFFECT — CTA buttons
+       Calculates click position relative to button for precise origin
+    ============================================================ */
+    document.querySelectorAll('.btn-cta').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        // Remove any existing ripple
+        const existing = this.querySelector('.ripple-wave');
+        if (existing) existing.remove();
+
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top  - size / 2;
+
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple-wave';
+        ripple.style.cssText = `
+          width: ${size}px;
+          height: ${size}px;
+          left: ${x}px;
+          top: ${y}px;
+        `;
+        this.appendChild(ripple);
+
+        // Clean up after animation completes
+        ripple.addEventListener('animationend', () => ripple.remove());
+      });
+    });
+
+
+    /* ============================================================
+       FORM VALIDATION & SUBMIT HANDLER
+    ============================================================ */
+    function handleSubmit() {
+      const nameEl  = document.getElementById('input-name');
+      const emailEl = document.getElementById('input-email');
+      const roleEl  = document.getElementById('input-role');
+      const errorEl = document.getElementById('form-error');
+      const btnEl   = document.getElementById('submit-btn');
+      const labelEl = document.getElementById('submit-label');
+
+      const name  = nameEl.value.trim();
+      const email = emailEl.value.trim();
+      const role  = roleEl.value;
+
+      // Clear previous error
+      errorEl.textContent = '';
+      errorEl.classList.add('hidden');
+
+      // Validate
+      if (!name) {
+        showError(errorEl, nameEl, 'Operator handle is required.');
+        return;
+      }
+      if (!email || !isValidEmail(email)) {
+        showError(errorEl, emailEl, 'A valid transmission address is required.');
+        return;
+      }
+      if (!role) {
+        showError(errorEl, roleEl, 'Please select an operator class.');
+        return;
+      }
+
+      // Loading state
+      btnEl.disabled = true;
+      labelEl.innerHTML = `
+        <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+          <path d="M12 2a10 10 0 0110 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        Encrypting Transmission...
+      `;
+
+      // Simulate async network request (1.5s)
+      setTimeout(() => {
+        showSuccess(name);
+      }, 1500);
+    }
+
+    function showError(errorEl, inputEl, message) {
+      errorEl.textContent = '⚠ ' + message;
+      errorEl.classList.remove('hidden');
+      inputEl.focus();
+      // Shake animation
+      inputEl.style.animation = 'none';
+      inputEl.offsetHeight; // Reflow
+      inputEl.style.animation = 'shake 0.4s ease';
+    }
+
+    function showSuccess(name) {
+      document.getElementById('form-view').style.display = 'none';
+      const successEl = document.getElementById('form-success');
+      successEl.classList.add('visible');
+      document.getElementById('success-handle').textContent = '// ' + name + ' — queued for genesis epoch';
+    }
+
+    function resetForm() {
+      // Reset inputs
+      ['input-name','input-email','input-role'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      // Reset button
+      const btnEl   = document.getElementById('submit-btn');
+      const labelEl = document.getElementById('submit-label');
+      if (btnEl) btnEl.disabled = false;
+      if (labelEl) labelEl.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+        Transmit Access Request
+      `;
+      // Reset error
+      const errorEl = document.getElementById('form-error');
+      if (errorEl) { errorEl.textContent = ''; errorEl.classList.add('hidden'); }
+      // Reset view
+      const formView = document.getElementById('form-view');
+      if (formView) formView.style.display = '';
+      const successEl = document.getElementById('form-success');
+      if (successEl) successEl.classList.remove('visible');
+    }
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    /* ============================================================
+       SCROLL REVEAL — Intersection Observer
+       Elements with class `reveal` fade-in when they enter viewport.
+       Uses IntersectionObserver (no scroll listeners = better perf).
+    ============================================================ */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          revealObserver.unobserve(entry.target); // Observe once only
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+
+    // Observe feature cards and stat cards
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.feature-card, .glass-card, .glass').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        revealObserver.observe(el);
+      });
+    });
+
+    /* ============================================================
+       INPUT SHAKE KEYFRAME — injected via JS to avoid CSS duplication
+    ============================================================ */
+    const shakeStyle = document.createElement('style');
+    shakeStyle.textContent = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%       { transform: translateX(-6px); }
+        40%       { transform: translateX(6px); }
+        60%       { transform: translateX(-4px); }
+        80%       { transform: translateX(4px); }
+      }
+    `;
+    document.head.appendChild(shakeStyle);
+  </script>
+
+</body>
+</html>
